@@ -15,7 +15,6 @@ def preprocess_text(text, config):
     characters_to_replace = config["characters_to_replace"]
     replacement_character = config["replacement_character"]
     characters_to_skip = config["characters_to_skip"]
-    characters_to_split = config["characters_to_split"]
     case_sensitive = config["case_sensitive"]
 
     # Convert text to lowercase if case sensitivity is turned off
@@ -24,7 +23,6 @@ def preprocess_text(text, config):
         allowed_characters = allowed_characters.lower()
         characters_to_replace = characters_to_replace.lower()
         characters_to_skip = characters_to_skip.lower()
-        characters_to_split = characters_to_split.lower()
 
     # Step 1: Replace specified characters
     text = "".join(
@@ -41,17 +39,18 @@ def preprocess_text(text, config):
     # Step 2: Remove characters to skip
     text = "".join([ch for ch in text if ch not in characters_to_skip])
 
-    # Step 3: Split the text based on characters in characters_to_split
-    split_chars = "|".join([f"\\{ch}" for ch in characters_to_split])
-    chunks = text.split(split_chars)
-
     # Join chunks together to form the final cleaned text for n-gram analysis
-    return "".join(chunks)
+    return text
 
 
-def generate_character_ngrams(text, n):
+def generate_character_ngrams(text, n, config):
     """Generate n-grams from a string of characters."""
-    return [text[i : i + n] for i in range(len(text) - n + 1)]
+    characters_to_split = config["characters_to_split"]
+    return [
+        text[i : i + n]
+        for i in range(len(text) - n + 1)
+        if not any(ch in characters_to_split for ch in text[i : i + n])
+    ]
 
 
 def most_common_ngrams(file_path, config):
@@ -65,8 +64,8 @@ def most_common_ngrams(file_path, config):
     # Generate n-grams and m-grams
     n = config["n"]
     m = config["m"]
-    n_grams = generate_character_ngrams(filtered_text, n)
-    m_grams = generate_character_ngrams(filtered_text, m)
+    n_grams = generate_character_ngrams(filtered_text, n, config)
+    m_grams = generate_character_ngrams(filtered_text, m, config)
 
     # Count the frequency of each n-gram and m-gram
     n_grams_count = Counter(n_grams)

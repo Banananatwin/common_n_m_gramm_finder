@@ -1,6 +1,7 @@
 {
     "input_file": "your_text_file.txt",
     "output_file": "ngram_matrix.csv",
+    "output_html_file": "ngram_matrix.html",
     "allowed_characters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
     "characters_to_replace": "!@#$%^&*()1234567890",
     "replacement_character": "_",

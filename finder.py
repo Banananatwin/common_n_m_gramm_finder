@@ -114,19 +114,71 @@ def count_ngram_combinations(text, n_grams, m_grams, n, m):
 
 
 def generate_ngram_matrix(n_grams, m_grams, counts, output_file):
-    with open(output_file, 'w', newline='') as csvfile:
+    with open(output_file, "w", newline="") as csvfile:
         csvwriter = csv.writer(csvfile)
-        
+
         # Write header row with m-grams
         header = [""] + m_grams
         csvwriter.writerow(header)
-        
+
         # Write each row for n-grams
         for n_gram in n_grams:
             row = [n_gram] + [counts.get((n_gram, m_gram), 0) for m_gram in m_grams]
             csvwriter.writerow(row)
-    
+
     print(f"N-gram / M-gram Combination Matrix written to {output_file}")
+
+
+def generate_html_ngram_matrix(n_grams, m_grams, counts, output_html_file):
+    """Generate an HTML table with color-coded cells based on n-gram/m-gram combination counts."""
+
+    # Determine the minimum and maximum counts for scaling colors
+    max_count = max(counts.values(), default=1)
+    min_count = min(counts.values(), default=0)
+
+    def color_gradient(count):
+        """Return a color from green (low) to red (high) based on count."""
+        if max_count == min_count:
+            return "#ff0000"  # Only red if there's a single value for all counts
+        # Scale count to range 0-255, with higher counts closer to red
+        scale = int(255 * (count - min_count) / (max_count - min_count))
+        red = 255
+        green = 255 - scale
+        return f"rgb({red},{green},0)"
+
+    # Start the HTML content
+    html_content = "<html><head><style>"
+    html_content += "table { border-collapse: collapse; width: 100%; }"
+    html_content += (
+        "th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }"
+    )
+    html_content += "</style></head><body>"
+    html_content += "<h2>N-gram / M-gram Combination Matrix</h2>"
+    html_content += "<table><tr><th></th>"
+
+    # Header row with m-grams
+    for m_gram in m_grams:
+        html_content += f"<th>{m_gram}</th>"
+    html_content += "</tr>"
+
+    # Rows with n-grams and color-coded counts
+    for n_gram in n_grams:
+        html_content += f"<tr><th>{n_gram}</th>"
+        for m_gram in m_grams:
+            count = counts.get((n_gram, m_gram), 0)
+            color = color_gradient(count)
+            html_content += f"<td style='background-color: {color}'>{count}</td>"
+        html_content += "</tr>"
+
+    # Close HTML tags
+    html_content += "</table></body></html>"
+
+    # Write the HTML content to the output file
+    with open(output_html_file, "w") as html_file:
+        html_file.write(html_content)
+
+    print(f"N-gram / M-gram Combination Matrix HTML file saved to {output_html_file}")
+
 
 # Example usage
 config_path = "config.json"
@@ -149,5 +201,16 @@ ngram_combinations_counts = count_ngram_combinations(
 
 # Generate and display the n-gram / m-gram combination matrix with counts
 generate_ngram_matrix(
-    most_common_n_grams, most_common_m_grams, ngram_combinations_counts, output_file_path
-    )
+    most_common_n_grams,
+    most_common_m_grams,
+    ngram_combinations_counts,
+    output_file_path,
+)
+
+output_html_file = config["output_html_file"]  # Set this in your config file
+generate_html_ngram_matrix(
+    most_common_n_grams,
+    most_common_m_grams,
+    ngram_combinations_counts,
+    output_html_file,
+)

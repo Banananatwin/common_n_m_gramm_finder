@@ -1,4 +1,6 @@
 {
+    "input_file": "your_text_file.txt",
+    "output_file": "ngram_matrix.csv",
     "allowed_characters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
     "characters_to_replace": "!@#$%^&*()1234567890",
     "replacement_character": "_",

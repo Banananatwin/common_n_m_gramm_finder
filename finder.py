@@ -1,3 +1,4 @@
+import csv
 import json
 from collections import Counter
 from itertools import islice
@@ -112,25 +113,33 @@ def count_ngram_combinations(text, n_grams, m_grams, n, m):
     return counts
 
 
-def generate_ngram_matrix(n_grams, m_grams, counts):
-    # Display the matrix
-    print("N-gram / M-gram Combination Matrix with Counts:")
-    print("       " + "  ".join([f"{m}" for m in m_grams]))  # Header row for m-grams
-    for i, n_gram in enumerate(n_grams):
-        row_str = "  ".join([f"{counts[(n_gram, m_gram)]}" for m_gram in m_grams])
-        print(f"{n_gram}  {row_str}")
-
+def generate_ngram_matrix(n_grams, m_grams, counts, output_file):
+    with open(output_file, 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        
+        # Write header row with m-grams
+        header = [""] + m_grams
+        csvwriter.writerow(header)
+        
+        # Write each row for n-grams
+        for n_gram in n_grams:
+            row = [n_gram] + [counts.get((n_gram, m_gram), 0) for m_gram in m_grams]
+            csvwriter.writerow(row)
+    
+    print(f"N-gram / M-gram Combination Matrix written to {output_file}")
 
 # Example usage
 config_path = "config.json"
-file_path = "your_text_file.txt"  # Replace with the path to your text file
 
 # Load the config
 config = load_config(config_path)
 
+input_file_path = config["input_file"]
+output_file_path = config["output_file"]
+
 # Get the most common n-grams, m-grams, and preprocessed text
 most_common_n_grams, most_common_m_grams, filtered_text = most_common_ngrams(
-    file_path, config
+    input_file_path, config
 )
 
 # Count occurrences of each (n-gram, m-gram) combination
@@ -140,5 +149,5 @@ ngram_combinations_counts = count_ngram_combinations(
 
 # Generate and display the n-gram / m-gram combination matrix with counts
 generate_ngram_matrix(
-    most_common_n_grams, most_common_m_grams, ngram_combinations_counts
-)
+    most_common_n_grams, most_common_m_grams, ngram_combinations_counts, output_file_path
+    )

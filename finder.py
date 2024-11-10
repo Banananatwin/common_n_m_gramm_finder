@@ -2,6 +2,7 @@ import csv
 import json
 from collections import Counter
 from itertools import islice
+from colour import Color
 
 
 def load_config(config_path):
@@ -135,16 +136,16 @@ def generate_html_ngram_matrix(n_grams, m_grams, counts, output_html_file):
     # Determine the minimum and maximum counts for scaling colors
     max_count = max(counts.values(), default=1)
     min_count = min(counts.values(), default=0)
+    
+    
+    col1 = Color("lime")
+    colors = list(col1.range_to(Color("red"),max_count))
+    colors.insert(0, Color("white"))
 
     def color_gradient(count):
         """Return a color from green (low) to red (high) based on count."""
-        if max_count == min_count:
-            return "#ff0000"  # Only red if there's a single value for all counts
-        # Scale count to range 0-255, with higher counts closer to red
-        scale = int(255 * (count - min_count) / (max_count - min_count))
-        red = 255
-        green = 255 - scale
-        return f"rgb({red},{green},0)"
+
+        return colors[count]
 
     # Start the HTML content
     html_content = "<html><head><style>"

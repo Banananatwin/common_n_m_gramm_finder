@@ -5,10 +5,11 @@
     "allowed_characters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
     "characters_to_replace": "!@#$%^&*()1234567890",
     "replacement_character": "_",
-    "characters_to_skip": " ",
-    "characters_to_split": ".",
+    "characters_to_skip": "",
+    "characters_to_split": " ",
     "case_sensitive": false,
-    "n": 2,
-    "m": 3,
-    "top_n": 10
+    "n": 5,
+    "m": 2,
+    "top_n": 20,
+    "darkmode":  true
 }

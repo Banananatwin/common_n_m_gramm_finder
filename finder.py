@@ -1,7 +1,7 @@
 import csv
 import json
 from collections import Counter
-from itertools import islice
+
 from colour import Color
 
 
@@ -130,17 +130,16 @@ def generate_ngram_matrix(n_grams, m_grams, counts, output_file):
     print(f"N-gram / M-gram Combination Matrix written to {output_file}")
 
 
-def generate_html_ngram_matrix(n_grams, m_grams, counts, output_html_file):
+def generate_html_ngram_matrix(n_grams, m_grams, counts, output_html_file, darkmode):
     """Generate an HTML table with color-coded cells based on n-gram/m-gram combination counts."""
 
     # Determine the minimum and maximum counts for scaling colors
     max_count = max(counts.values(), default=1)
     min_count = min(counts.values(), default=0)
-    
-    
+
     col1 = Color("lime")
-    colors = list(col1.range_to(Color("red"),max_count))
-    colors.insert(0, Color("white"))
+    colors = list(col1.range_to(Color("red"), max_count))
+    colors.insert(0, Color("#19191b")) if darkmode else colors.insert(0, Color("white"))
 
     def color_gradient(count):
         """Return a color from green (low) to red (high) based on count."""
@@ -150,6 +149,9 @@ def generate_html_ngram_matrix(n_grams, m_grams, counts, output_html_file):
     # Start the HTML content
     html_content = "<html><head><style>"
     html_content += "table { border-collapse: collapse; width: 100%; }"
+    if darkmode:
+        html_content += "body {background-color: #19191b; color: white}"
+
     html_content += (
         "th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }"
     )
@@ -214,4 +216,5 @@ generate_html_ngram_matrix(
     most_common_m_grams,
     ngram_combinations_counts,
     output_html_file,
+    config["darkmode"],
 )

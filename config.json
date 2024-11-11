@@ -11,5 +11,9 @@
     "n": 5,
     "m": 2,
     "top_n": 20,
-    "darkmode":  true
+    "darkmode":  true,
+    "highlight_method": "ngrams",
+    "slide_method": "slide",
+    "highlight_color": "#ffcccb",
+    "output_text_html_file": "highlighted_text.html"
 }

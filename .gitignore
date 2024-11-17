@@ -163,3 +163,4 @@ cython_debug/
 your_text_file.txt
 ngram_matrix.csv
 ngram_matrix.html
+text_high.html

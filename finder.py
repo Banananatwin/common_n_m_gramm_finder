@@ -126,11 +126,13 @@ def generate_html_ngram_matrix(n_grams, m_grams, counts, colors):
     max_count = max(counts.values(), default=1)
     min_count = min(counts.values(), default=0)
 
-    colors = list(colors[0].range_to(colors[1], max_count))
-    colors.insert(0, Color("#19191b")) if darkmode else colors.insert(0, Color("white"))
+    # Generate a three-color gradient
+    gradient_list = list(colors[0].range_to(colors[1], max_count // 2))
+    gradient_list += list(colors[1].range_to(colors[2], max_count // 2))
+    gradient_list.insert(0, Color("#19191b") if darkmode else Color("white"))
 
     def color_gradient(count):
-        return colors[count]
+        return gradient_list[count]
 
     html_content = "<html><head><style>"
     html_content += "table { border-collapse: collapse; width: 100%; }"
@@ -181,10 +183,10 @@ def highlight_ngrams_by_frequency(
     # Determine the maximum frequency for scaling colors
     max_frequency = max(frequencies.values(), default=1)
 
-    # Generate a color gradient from light yellow to dark red
-    low_color = colors[0]  # Light yellow
-    high_color = colors[1]  # Dark red
-    gradient = list(low_color.range_to(high_color, max_frequency))
+    # Generate a three-color gradient
+    low_color, mid_color, high_color = colors
+    gradient = list(low_color.range_to(mid_color, max_frequency // 2))
+    gradient += list(mid_color.range_to(high_color, max_frequency // 2 + 1))
 
     # Map each n-gram to its frequency-based color
     ngram_colors = {
@@ -247,7 +249,7 @@ def highlight_ngrams_by_frequency(
 
 def main():
     # Main Execution
-    colors = [Color("lime"), Color("red")]
+    colors = [Color("blue"), Color("lime"), Color("red")]
     most_common_n_grams, most_common_m_grams, filtered_text = most_common_ngrams()
     ngram_combinations_counts = count_ngram_combinations(
         filtered_text,

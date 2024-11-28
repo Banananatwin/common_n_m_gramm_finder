@@ -1,4 +1,3 @@
-import csv
 import json
 import re
 from collections import Counter
@@ -80,7 +79,7 @@ def most_common_ngrams():
     return most_common_n_grams, most_common_m_grams, filtered_text
 
 
-def count_ngram_combinations(text, n_grams, m_grams, n, m):
+def count_ngram_combinations(text, n_grams, m_grams, n, m, lower_trim, upper_trim):
     """Count occurrences of each (n-gram, m-gram) combination."""
     counts = {}
     n_gram_positions = {n_gram: [] for n_gram in n_grams}
@@ -104,20 +103,22 @@ def count_ngram_combinations(text, n_grams, m_grams, n, m):
                     break
                 if text[n_pos + n : n_pos + n + m] == m_gram:
                     count += 1
-            counts[(n_gram, m_gram)] = count
+            counts[(n_gram, m_gram)] = (
+                count if count < upper_trim and count > lower_trim else 0
+            )
     return counts
 
 
-def generate_ngram_matrix(n_grams, m_grams, counts):
-    output_file = config["output_file"]
-    with open(output_file, "w", newline="") as csvfile:
-        csvwriter = csv.writer(csvfile)
-        header = [""] + m_grams
-        csvwriter.writerow(header)
-        for n_gram in n_grams:
-            row = [n_gram] + [counts.get((n_gram, m_gram), 0) for m_gram in m_grams]
-            csvwriter.writerow(row)
-    print(f"N-gram / M-gram Combination Matrix written to {output_file}")
+# def generate_ngram_matrix(n_grams, m_grams, counts):
+#     output_file = config["output_file"]
+#     with open(output_file, "w", newline="") as csvfile:
+#         csvwriter = csv.writer(csvfile)
+#         header = [""] + m_grams
+#         csvwriter.writerow(header)
+#         for n_gram in n_grams:
+#             row = [n_gram] + [counts.get((n_gram, m_gram), 0) for m_gram in m_grams]
+#             csvwriter.writerow(row)
+#     print(f"N-gram / M-gram Combination Matrix written to {output_file}")
 
 
 def generate_html_ngram_matrix(n_grams, m_grams, counts, colors):
@@ -163,19 +164,14 @@ def generate_html_ngram_matrix(n_grams, m_grams, counts, colors):
     print(f"N-gram / M-gram Combination Matrix HTML file saved to {output_html_file}")
 
 
-def highlight_ngrams_by_frequency(
-    most_common_n_grams, most_common_m_grams, input_file_path, output_html_path, colors
-):
+def highlight_ngrams_by_frequency(ngrams, input_file_path, output_html_path, colors):
     # Read the input text
     with open(input_file_path, "r") as file:
         text = file.read()
 
-    # Combine n-grams and m-grams into one list
-    all_ngrams = most_common_n_grams + most_common_m_grams
-
     # Count the frequency of each n-gram in the text
     frequencies = Counter()
-    for ngram in all_ngrams:
+    for ngram in ngrams:
         frequencies[ngram] = len(
             re.findall(re.escape(ngram), text, flags=re.IGNORECASE)
         )
@@ -194,10 +190,10 @@ def highlight_ngrams_by_frequency(
     }
 
     # Sort n-grams by length to prioritize longer matches
-    all_ngrams.sort(key=len, reverse=True)
+    ngrams.sort(key=len, reverse=True)
 
     # Escape special characters in n-grams for regex
-    escaped_patterns = [(re.escape(ngram), ngram_colors[ngram]) for ngram in all_ngrams]
+    escaped_patterns = [(re.escape(ngram), ngram_colors[ngram]) for ngram in ngrams]
 
     # Function to wrap matches with span tags
     def replace_match(match):
@@ -257,17 +253,18 @@ def main():
         most_common_m_grams,
         config["n"],
         config["m"],
+        42,
+        69,
     )
 
-    generate_ngram_matrix(
-        most_common_n_grams, most_common_m_grams, ngram_combinations_counts
-    )
+    # generate_ngram_matrix(
+    #     most_common_n_grams, most_common_m_grams, ngram_combinations_counts
+    # )
     generate_html_ngram_matrix(
         most_common_n_grams, most_common_m_grams, ngram_combinations_counts, colors
     )
     highlight_ngrams_by_frequency(
-        most_common_n_grams,
-        most_common_m_grams,
+        most_common_n_grams + most_common_m_grams,
         config["input_file"],
         config["output_highlighted_text"],
         colors,
